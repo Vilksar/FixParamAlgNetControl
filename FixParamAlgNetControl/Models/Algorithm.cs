@@ -139,9 +139,9 @@ namespace FixParamAlgNetControl.Models
         /// Runs the algorithm.
         /// </summary>
         /// <param name="logger">The application logger.</param>
-        /// <param name="hostApplicationLifetime">The host application lifetime.</param>
+        /// <param name="cancellationToken">The cancellation token for the application.</param>
         /// <returns>A JSON object containing the final result.</returns>
-        public Result Run(ILogger logger, IHostApplicationLifetime hostApplicationLifetime)
+        public Result Run(ILogger logger, CancellationToken cancellationToken)
         {
             // Log a message.
             logger.LogInformation($"{DateTime.Now}: The algorithm has started.");
@@ -171,64 +171,53 @@ namespace FixParamAlgNetControl.Models
             var listPowersMatrixCA = listPowersMatrixA
                 .Select(item => GetPowersMatrixCA(matrixC, item));
             // Get the maximum number of targets that can be controlled with the given source nodes.
-            var maximumRank = listPowersMatrixCA
-                .Select(item => GetKalmanMatrixRank(GetMatrixB(nodeIndices, SourceNodes), item))
-                .Max();
+            var maximumRank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, SourceNodes), listPowersMatrixCA);
             // Log a message.
             logger.LogInformation($"{DateTime.Now}: The given source nodes can control at most {maximumRank} target nodes within a path of maximum length {Parameters.MaximumPathLength}.");
             // Get the initial best solution.
-            var bestSolution = SourceNodes.ToList();
-            var bestSolutionCount = bestSolution.Count();
+            var bestSolution = new List<string>();
+            var bestSolutionCount = maximumRank + 1;
             // Define the variables required for the loop.
             var checkedSubsets = (long)0;
             var totalSubsets = (long)Math.Pow(2, SourceNodes.Count());
             // Get all of the subsets of source nodes.
             var subsets = GetAllSubsets(SourceNodes);
             // Use a new timer to display the progress.
-            using (new Timer(item => logger.LogInformation($"{DateTime.Now}: {checkedSubsets} / {totalSubsets} subset(s) checked with a total running time of {stopwatch.Elapsed}. "), null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
+            using (new Timer(item =>
+                {
+                    // Get the required variables.
+                    var localCheckedSubsets = Interlocked.Read(ref checkedSubsets);
+                    var localBestSolutionCount = Interlocked.CompareExchange(ref bestSolutionCount, 0, 0);
+                    // Log a message.
+                    logger.LogInformation($"{DateTime.Now}: {localCheckedSubsets} / {totalSubsets} subset(s) checked ({(localBestSolutionCount == 0 ? "no" : localBestSolutionCount.ToString())} best solution) with a total running time of {stopwatch.Elapsed}.");
+                }, null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
             {
                 // Check if the algorithm should run in parallel.
                 if (Parameters.RunInParallel)
                 {
-                    // Define a new object to prevent concurrent access.
-                    var lockObject = new object();
                     // Go over all subsets of source nodes.
-                    Parallel.ForEach(subsets, new ParallelOptions { CancellationToken = hostApplicationLifetime.ApplicationStopping }, subset =>
+                    Parallel.ForEach(subsets, new ParallelOptions { CancellationToken = cancellationToken }, subset =>
                     {
+                        // Increment the count of the checked subsets.
+                        Interlocked.Increment(ref checkedSubsets);
                         // Get the number of nodes in the current subset.
                         var subsetCount = subset.Count();
-                        var bestCount = subsetCount + 1;
-                        // Lock to prevent concurrent access.
-                        lock (lockObject)
-                        {
-                            // Get the number of nodes in the best solution.
-                            bestCount = bestSolutionCount;
-                        }
+                        var bestCount = Interlocked.CompareExchange(ref bestSolutionCount, 0, 0);
                         // Check if the current subset is empty or is larger or equal to the best solution.
                         if (subsetCount == 0 || bestCount <= subsetCount)
                         {
-                            // Increment the count of the checked subsets.
-                            Interlocked.Increment(ref checkedSubsets);
                             // Continue.
                             return;
                         }
                         // Get the number of controlled targets.
-                        var rank = listPowersMatrixCA
-                            .Select(item => GetKalmanMatrixRank(GetMatrixB(nodeIndices, subset), item))
-                            .Max();
+                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset), listPowersMatrixCA);
                         // Check if the rank is equal to the maximum rank.
                         if (rank == maximumRank)
                         {
-                            // Lock an object to prevent concurrent access.
-                            lock (lockObject)
-                            {
-                                // Update the best solution.
-                                bestSolution = subset.ToList();
-                                bestSolutionCount = bestSolution.Count();
-                            }
+                            // Update the best solution.
+                            Interlocked.Exchange(ref bestSolution, subset.ToList());
+                            Interlocked.Exchange(ref bestSolutionCount, bestSolution.Count());
                         }
-                        // Increment the count of the checked subsets.
-                        Interlocked.Increment(ref checkedSubsets);
                     });
                 }
                 else
@@ -236,37 +225,33 @@ namespace FixParamAlgNetControl.Models
                     // Go over all subsets of source nodes.
                     foreach (var subset in subsets)
                     {
+                        // Check if the application close was requested.
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            // Log a message.
+                            logger.LogInformation($"{DateTime.Now}: The algorithm has been stopped, as the application is closing.");
+                            // Break.
+                            break;
+                        }
+                        // Increment the count of the checked subsets.
+                        checkedSubsets += 1;
                         // Get the number of nodes in the current subset.
                         var subsetCount = subset.Count();
                         var bestCount = bestSolutionCount;
                         // Check if the current subset is empty or is larger or equal to the best solution.
                         if (subsetCount == 0 || bestCount <= subsetCount)
                         {
-                            // Increment the count of the checked subsets.
-                            checkedSubsets += 1;
                             // Continue.
                             continue;
                         }
                         // Get the number of controlled targets.
-                        var rank = listPowersMatrixCA
-                            .Select(item => GetKalmanMatrixRank(GetMatrixB(nodeIndices, subset), item))
-                            .Max();
+                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset), listPowersMatrixCA);
                         // Check if the rank is equal to the maximum rank.
                         if (rank == maximumRank)
                         {
                             // Update the best solution.
                             bestSolution = subset.ToList();
                             bestSolutionCount = bestSolution.Count();
-                        }
-                        // Increment the count of the checked subsets.
-                        checkedSubsets += 1;
-                        // Check if the application close was requested.
-                        if (hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
-                        {
-                            // Log a message.
-                            logger.LogInformation($"{DateTime.Now}: The algorithm has been stopped, as the application is closing.");
-                            // Break.
-                            break;
                         }
                     }
                 }
@@ -421,6 +406,37 @@ namespace FixParamAlgNetControl.Models
             }
             // Return the rank of the matrix.
             return matrixR.Rank();
+        }
+
+        /// <summary>
+        /// Get the structural rank corresponding to the provided list of source nodes. The structural rank is computed by repeatedly computing the rank and returning the first repeated value, or the largest.
+        /// </summary>
+        /// <param name="matrixB">The matrix corresponding to the source nodes in the graph.</param>
+        /// <param name="listPowersMatrixCA">The list containing the lists of different powers of the matrix (CA, CA^2, CA^3, ... ).</param>
+        /// <returns>True if the chromosome is a solution, false otherwise</returns>
+        private static int GetStructuralKalmanMatrixRank(Matrix<double> matrixB, IEnumerable<List<Matrix<double>>> listPowersMatrixCA)
+        {
+            // Define the variable to return.
+            var structuralRank = 0;
+            // Go over each list of powers of the CA matrix.
+            foreach (var powersMatrixCA in listPowersMatrixCA)
+            {
+                // Get the corresponding rank.
+                var rank = GetKalmanMatrixRank(matrixB, powersMatrixCA);
+                // Check if the current rank is different than the previous one.
+                if (structuralRank < rank)
+                {
+                    // Assign the new structural rank.
+                    structuralRank = rank;
+                }
+                else if (structuralRank == rank)
+                {
+                    // Break.
+                    break;
+                }
+            }
+            // Return the structural rank.
+            return structuralRank;
         }
 
         /// <summary>

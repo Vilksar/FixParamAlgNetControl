@@ -285,7 +285,7 @@ namespace FixParamAlgNetControl.Services
             }
             // Log a message about the loaded data.
             _logger.LogInformation(string.Concat("The following data has been loaded.",
-                $"\n\t{edges.Count()} edge(s) and {nodes.Count()} nodes loaded from \"{edgesFilepath}\".",
+                $"\n\t{edges.Count()} edge(s) and {nodes.Count()} node(s) loaded from \"{edgesFilepath}\".",
                 $"\n\t{targetNodes.Count()} target node(s) loaded from \"{targetNodesFilepath}\".",
                 $"\n\t{sourceNodes.Count()} source node(s) loaded{(string.IsNullOrEmpty(sourceNodesFilepath) ? string.Empty : $" from {sourceNodesFilepath}")}."));
             // Log a message about the parameters.
@@ -306,7 +306,7 @@ namespace FixParamAlgNetControl.Services
                     Parameters = parameters
                 };
                 // Run the algorithm on the given data.
-                result = algorithm1.Run(_logger, _hostApplicationLifetime);
+                result = algorithm1.Run(_logger, _hostApplicationLifetime.ApplicationStopping);
             }
             catch (Exception exception)
             {
