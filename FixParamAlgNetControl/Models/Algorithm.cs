@@ -188,8 +188,9 @@ namespace FixParamAlgNetControl.Models
                     // Get the required variables.
                     var localCheckedSubsets = Interlocked.Read(ref checkedSubsets);
                     var localBestSolutionCount = Interlocked.CompareExchange(ref bestSolutionCount, 0, 0);
+                    var localBestSolutionString = localBestSolutionCount == maximumRank + 1 ? "no" : localBestSolutionCount.ToString();
                     // Log a message.
-                    logger.LogInformation($"{DateTime.Now}: {localCheckedSubsets} / {totalSubsets} subset(s) checked ({(localBestSolutionCount == maximumRank + 1 ? "no" : localBestSolutionCount.ToString())} best solution) with a total running time of {stopwatch.Elapsed}.");
+                    logger.LogInformation($"{DateTime.Now}: {localCheckedSubsets} / {totalSubsets} subset(s) checked ({localBestSolutionString} best solution) with a total running time of {stopwatch.Elapsed}.");
                 }, null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
             {
                 // Check if the algorithm should run in parallel.
@@ -444,7 +445,7 @@ namespace FixParamAlgNetControl.Models
         /// </summary>
         /// <param name="list">The initial list.</param>
         /// <returns>All subsets of the list.</returns>
-        private static List<List<string>> GetAllSubsets(List<string> list)
+        private static IOrderedEnumerable<List<string>> GetAllSubsets(List<string> list)
         {
             // Return all of the subsets of the list, ordered by their size.
             return Enumerable.Range(0, 1 << list.Count())
@@ -452,8 +453,7 @@ namespace FixParamAlgNetControl.Models
                     .Where(item1 => (item & (1 << item1)) != 0)
                     .Select(item1 => list[item1])
                     .ToList())
-                .OrderBy(item => item.Count())
-                .ToList();
+                .OrderBy(item => item.Count());
         }
     }
 }
