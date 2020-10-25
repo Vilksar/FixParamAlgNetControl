@@ -177,11 +177,14 @@ namespace FixParamAlgNetControl.Models
             // Get the initial best solution.
             var bestSolution = new List<string>();
             var bestSolutionCount = maximumRank + 1;
+            // Get the sizes of the subsets to check.
+            var minimumSubsetSize = (int)Math.Ceiling((double)TargetNodes.Count() / (Parameters.MaximumPathLength + 1));
+            var maximumSubsetSize = maximumRank;
+            // Get all of the subsets of source nodes, ordered by their size.
+            var subsets = Enumerable.Range(minimumSubsetSize, maximumSubsetSize - minimumSubsetSize + 1).Select(item => GetAllSubsetsOfSize(SourceNodes, item)).SelectMany(item => item);
             // Define the variables required for the loop.
             var checkedSubsets = (long)0;
-            var totalSubsets = (long)Math.Pow(2, SourceNodes.Count());
-            // Get all of the subsets of source nodes.
-            var subsets = GetAllSubsets(SourceNodes);
+            var totalSubsets = (long)GetRowOfPascalTriangle(SourceNodes.Count()).Skip(minimumSubsetSize).Take(maximumSubsetSize - minimumSubsetSize + 1).Sum();
             // Use a new timer to display the progress.
             using (new Timer(item =>
                 {
@@ -197,21 +200,18 @@ namespace FixParamAlgNetControl.Models
                 if (Parameters.RunInParallel)
                 {
                     // Go over all subsets of source nodes.
-                    Parallel.ForEach(subsets, new ParallelOptions { CancellationToken = cancellationToken }, subset =>
+                    Parallel.ForEach(subsets, new ParallelOptions { CancellationToken = cancellationToken }, (subset, state) =>
                     {
                         // Increment the count of the checked subsets.
                         Interlocked.Increment(ref checkedSubsets);
-                        // Get the number of nodes in the current subset.
-                        var subsetCount = subset.Count();
-                        var bestCount = Interlocked.CompareExchange(ref bestSolutionCount, 0, 0);
                         // Check if the current subset is empty or is larger or equal to the best solution.
-                        if (subsetCount == 0 || bestCount <= subsetCount)
+                        if (Interlocked.CompareExchange(ref bestSolutionCount, 0, 0) <= subset.Count())
                         {
-                            // Continue.
-                            return;
+                            // Break.
+                            state.Break();
                         }
                         // Get the number of controlled targets.
-                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset), listPowersMatrixCA);
+                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset.ToList()), listPowersMatrixCA);
                         // Check if the rank is equal to the maximum rank.
                         if (rank == maximumRank)
                         {
@@ -240,13 +240,13 @@ namespace FixParamAlgNetControl.Models
                         var subsetCount = subset.Count();
                         var bestCount = bestSolutionCount;
                         // Check if the current subset is empty or is larger or equal to the best solution.
-                        if (subsetCount == 0 || bestCount <= subsetCount)
+                        if (bestSolutionCount <= subset.Count())
                         {
-                            // Continue.
-                            continue;
+                            // Break.
+                            break;
                         }
                         // Get the number of controlled targets.
-                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset), listPowersMatrixCA);
+                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset.ToList()), listPowersMatrixCA);
                         // Check if the rank is equal to the maximum rank.
                         if (rank == maximumRank)
                         {
@@ -445,15 +445,48 @@ namespace FixParamAlgNetControl.Models
         /// </summary>
         /// <param name="list">The initial list.</param>
         /// <returns>All subsets of the list.</returns>
-        private static IOrderedEnumerable<List<string>> GetAllSubsets(List<string> list)
+        private static IEnumerable<IEnumerable<string>> GetAllSubsets(List<string> list)
         {
             // Return all of the subsets of the list, ordered by their size.
             return Enumerable.Range(0, 1 << list.Count())
                 .Select(item => Enumerable.Range(0, list.Count())
                     .Where(item1 => (item & (1 << item1)) != 0)
-                    .Select(item1 => list[item1])
-                    .ToList())
-                .OrderBy(item => item.Count());
+                    .Select(item1 => list[item1]));
+        }
+
+        /// <summary>
+        /// Gets all of the subsets of a given list.
+        /// </summary>
+        /// <param name="list">The initial list.</param>
+        /// <returns>All subsets of the list.</returns>
+        private static IEnumerable<IEnumerable<string>> GetAllSubsetsOfSize(List<string> list, int subsetSize)
+        {
+            // Return all of the subsets of the list, ordered by their size.
+            return GetAllSubsets(list)
+                .Where(item => item.Count() == subsetSize);
+        }
+
+        /// <summary>
+        /// Gets the row of the Pascal triangle corresponding to the given number.
+        /// </summary>
+        /// <param name="rowNumber">The number whose corresponding row in Pascal triangle to compute.</param>
+        /// <returns>The row of the Pascal triangle corresponding to the given number.</returns>
+        private static List<long> GetRowOfPascalTriangle(int rowNumber)
+        {
+            // Define the current list.
+            var currentList = new List<long> { 1 };
+            // Go over each integer.
+            for (int index1 = 1; index1 <= rowNumber; index1++)
+            {
+                // Define the next list.
+                var nextList = new List<long> { 1, 1 };
+                // Insert in the list all sums of consecutive element pairs from the current list.
+                nextList.InsertRange(1, currentList.Zip(currentList.Skip(1), (first, second) => first + second));
+                // Update the current list.
+                currentList = nextList.ToList();
+            }
+            // Return the current list.
+            return currentList;
         }
     }
 }
