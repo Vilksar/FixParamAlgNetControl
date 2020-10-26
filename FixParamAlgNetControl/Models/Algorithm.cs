@@ -178,7 +178,7 @@ namespace FixParamAlgNetControl.Models
             var bestSolution = new List<string>();
             var bestSolutionCount = maximumRank + 1;
             // Get the sizes of the subsets to check.
-            var minimumSubsetSize = (int)Math.Ceiling((double)TargetNodes.Count() / (Parameters.MaximumPathLength + 1));
+            var minimumSubsetSize = (int)Math.Ceiling((double)maximumRank / (Parameters.MaximumPathLength + 1));
             var maximumSubsetSize = maximumRank;
             // Get all of the subsets of source nodes, ordered by their size.
             var subsets = Enumerable.Range(minimumSubsetSize, maximumSubsetSize - minimumSubsetSize + 1).Select(item => GetAllSubsetsOfSize(SourceNodes, item)).SelectMany(item => item);
