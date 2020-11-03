@@ -25,8 +25,8 @@ namespace FixParamAlgNetControl.Models
         public int RankComputations { get; set; } = 3;
 
         /// <summary>
-        /// Represents the parallel flag to be used in the algorithm.
+        /// Represents the maximum degree of parallelism for the algorithm.
         /// </summary>
-        public bool RunInParallel { get; set; } = false;
+        public int MaximumDegreeOfParallelism { get; set; } = 1;
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -77,6 +78,14 @@ namespace FixParamAlgNetControl.Models
             {
                 // Log a message.
                 logger.LogError($"{DateTime.Now}: The number of rank computations must be a positive integer.");
+                // Return false.
+                return false;
+            }
+            // Check if the maximum degree of parallelism is not valid.
+            if (Parameters.MaximumDegreeOfParallelism <= 0)
+            {
+                // Log a message.
+                logger.LogError($"{DateTime.Now}: The maximum degree of parallelism must be a positive integer.");
                 // Return false.
                 return false;
             }
@@ -174,93 +183,50 @@ namespace FixParamAlgNetControl.Models
             var maximumRank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, SourceNodes), listPowersMatrixCA);
             // Log a message.
             logger.LogInformation($"{DateTime.Now}: The given source nodes can control at most {maximumRank} target nodes within a path of maximum length {Parameters.MaximumPathLength}.");
-            // Get the initial best solution.
-            var bestSolution = new List<string>();
-            var bestSolutionCount = maximumRank + 1;
             // Get the sizes of the subsets to check.
             var minimumSubsetSize = (int)Math.Ceiling((double)maximumRank / (Parameters.MaximumPathLength + 1));
-            var maximumSubsetSize = maximumRank;
+            var maximumSubsetSize = SourceNodes.Count();
+            // Define a new concurrent bag.
+            var concurrentBag = new ConcurrentBag<List<string>>();
             // Get all of the subsets of source nodes, ordered by their size.
             var subsets = Enumerable.Range(minimumSubsetSize, maximumSubsetSize - minimumSubsetSize + 1).Select(item => GetAllSubsetsOfSize(SourceNodes, item)).SelectMany(item => item);
             // Define the variables required for the loop.
             var checkedSubsets = (long)0;
             var totalSubsets = (long)GetRowOfPascalTriangle(SourceNodes.Count()).Skip(minimumSubsetSize).Take(maximumSubsetSize - minimumSubsetSize + 1).Sum();
             // Use a new timer to display the progress.
-            using (new Timer(item =>
-                {
-                    // Get the required variables.
-                    var localCheckedSubsets = Interlocked.Read(ref checkedSubsets);
-                    var localBestSolutionCount = Interlocked.CompareExchange(ref bestSolutionCount, 0, 0);
-                    var localBestSolutionString = localBestSolutionCount == maximumRank + 1 ? "no" : localBestSolutionCount.ToString();
-                    // Log a message.
-                    logger.LogInformation($"{DateTime.Now}: {localCheckedSubsets} / {totalSubsets} subset(s) checked ({localBestSolutionString} best solution) with a total running time of {stopwatch.Elapsed}.");
-                }, null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
+            using (new Timer(item => logger.LogInformation($"{DateTime.Now}: {Interlocked.Read(ref checkedSubsets)} / {totalSubsets} subset(s) checked ({stopwatch.Elapsed})."), null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
             {
-                // Check if the algorithm should run in parallel.
-                if (Parameters.RunInParallel)
+                // Go over all subsets of source nodes.
+                Parallel.ForEach(subsets, new ParallelOptions { MaxDegreeOfParallelism = Parameters.MaximumDegreeOfParallelism, CancellationToken = cancellationToken }, (subset, state) =>
                 {
-                    // Go over all subsets of source nodes.
-                    Parallel.ForEach(subsets, new ParallelOptions { CancellationToken = cancellationToken }, (subset, state) =>
+                    // Increment the count of the checked subsets.
+                    Interlocked.Increment(ref checkedSubsets);
+                    // Get the number of controlled targets.
+                    var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset.ToList()), listPowersMatrixCA);
+                    // Check if the rank is equal to the maximum rank.
+                    if (rank == maximumRank)
                     {
-                        // Increment the count of the checked subsets.
-                        Interlocked.Increment(ref checkedSubsets);
-                        // Check if the current subset is empty or is larger or equal to the best solution.
-                        if (Interlocked.CompareExchange(ref bestSolutionCount, 0, 0) <= subset.Count())
-                        {
-                            // Break.
-                            state.Break();
-                        }
-                        // Get the number of controlled targets.
-                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset.ToList()), listPowersMatrixCA);
-                        // Check if the rank is equal to the maximum rank.
-                        if (rank == maximumRank)
-                        {
-                            // Update the best solution.
-                            Interlocked.Exchange(ref bestSolution, subset.ToList());
-                            Interlocked.Exchange(ref bestSolutionCount, bestSolution.Count());
-                        }
-                    });
-                }
-                else
-                {
-                    // Go over all subsets of source nodes.
-                    foreach (var subset in subsets)
-                    {
-                        // Check if the application close was requested.
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            // Log a message.
-                            logger.LogInformation($"{DateTime.Now}: The algorithm has been stopped, as the application is closing.");
-                            // Break.
-                            break;
-                        }
-                        // Increment the count of the checked subsets.
-                        checkedSubsets += 1;
-                        // Get the number of nodes in the current subset.
-                        var subsetCount = subset.Count();
-                        var bestCount = bestSolutionCount;
-                        // Check if the current subset is empty or is larger or equal to the best solution.
-                        if (bestSolutionCount <= subset.Count())
-                        {
-                            // Break.
-                            break;
-                        }
-                        // Get the number of controlled targets.
-                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset.ToList()), listPowersMatrixCA);
-                        // Check if the rank is equal to the maximum rank.
-                        if (rank == maximumRank)
-                        {
-                            // Update the best solution.
-                            bestSolution = subset.ToList();
-                            bestSolutionCount = bestSolution.Count();
-                        }
+                        // Add the solution to the bag.
+                        concurrentBag.Add(subset.ToList());
+                        // Break.
+                        state.Stop();
                     }
-                }
+                });
             }
             // Stop the measuring watch.
             stopwatch.Stop();
             // Log a message.
             logger.LogInformation($"{DateTime.Now}: The algorithm has ended.");
+            // Get the solution.
+            var solution = concurrentBag.FirstOrDefault();
+            // Check if there wasn't any solution found.
+            if (solution == null)
+            {
+                // Log a message.
+                logger.LogError($"{DateTime.Now}: The algorithm completed, but didn't return any solutions.");
+                // Return.
+                return null;
+            }
             // Return the results.
             return new Result
             {
@@ -269,8 +235,8 @@ namespace FixParamAlgNetControl.Models
                 TargetNodeCount = TargetNodes.Count(),
                 SourceNodeCount = SourceNodes.Count(),
                 MaximumRank = maximumRank,
-                SolutionNodeCount = bestSolutionCount,
-                SolutionNodes = bestSolution,
+                SolutionNodeCount = solution.Count(),
+                SolutionNodes = solution,
                 TimeElapsed = stopwatch.Elapsed,
             };
         }
@@ -445,25 +411,16 @@ namespace FixParamAlgNetControl.Models
         /// </summary>
         /// <param name="list">The initial list.</param>
         /// <returns>All subsets of the list.</returns>
-        private static IEnumerable<IEnumerable<string>> GetAllSubsets(List<string> list)
+        private static IEnumerable<List<string>> GetAllSubsetsOfSize(List<string> list, int subsetSize)
         {
             // Return all of the subsets of the list, ordered by their size.
             return Enumerable.Range(0, 1 << list.Count())
                 .Select(item => Enumerable.Range(0, list.Count())
-                    .Where(item1 => (item & (1 << item1)) != 0)
-                    .Select(item1 => list[item1]));
-        }
-
-        /// <summary>
-        /// Gets all of the subsets of a given list.
-        /// </summary>
-        /// <param name="list">The initial list.</param>
-        /// <returns>All subsets of the list.</returns>
-        private static IEnumerable<IEnumerable<string>> GetAllSubsetsOfSize(List<string> list, int subsetSize)
-        {
-            // Return all of the subsets of the list, ordered by their size.
-            return GetAllSubsets(list)
-                .Where(item => item.Count() == subsetSize);
+                    .Where(item1 => (item & (1 << item1)) != 0))
+                .Where(item => item.Count() == subsetSize)
+                .Select(item => item
+                    .Select(item1 => list[item1])
+                    .ToList());
         }
 
         /// <summary>
