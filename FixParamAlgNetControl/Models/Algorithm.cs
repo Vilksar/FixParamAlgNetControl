@@ -191,7 +191,7 @@ namespace FixParamAlgNetControl.Models
             var bestSolutionCount = SourceNodes.Count();
             // Define the variables required for the loop.
             var checkedSubsets = (long)0;
-            var totalSubsets = (long)GetRowOfPascalTriangle(SourceNodes.Count()).Skip(minimumSubsetSize).Take(maximumSubsetSize - minimumSubsetSize + 1).Sum();
+            var totalSubsets = (long)Math.Pow(2, SourceNodes.Count());
             // Use a new timer to display the progress.
             using (new Timer(item => logger.LogInformation($"{DateTime.Now}: {Interlocked.Read(ref checkedSubsets)} / {totalSubsets} subset(s) checked in {stopwatch.Elapsed} with a best solution size of {Interlocked.CompareExchange(ref bestSolutionCount, 0, 0)}."), null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
             {
@@ -444,29 +444,6 @@ namespace FixParamAlgNetControl.Models
                 // Yield return the start value.
                 yield return start;
             }
-        }
-
-        /// <summary>
-        /// Gets the row of the Pascal triangle corresponding to the given number.
-        /// </summary>
-        /// <param name="rowNumber">The number whose corresponding row in Pascal triangle to compute.</param>
-        /// <returns>The row of the Pascal triangle corresponding to the given number.</returns>
-        private static List<long> GetRowOfPascalTriangle(int rowNumber)
-        {
-            // Define the current list.
-            var currentList = new List<long> { 1 };
-            // Go over each integer.
-            for (int index1 = 1; index1 <= rowNumber; index1++)
-            {
-                // Define the next list.
-                var nextList = new List<long> { 1, 1 };
-                // Insert in the list all sums of consecutive element pairs from the current list.
-                nextList.InsertRange(1, currentList.Zip(currentList.Skip(1), (first, second) => first + second));
-                // Update the current list.
-                currentList = nextList.ToList();
-            }
-            // Return the current list.
-            return currentList;
         }
     }
 }
