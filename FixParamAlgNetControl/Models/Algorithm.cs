@@ -185,7 +185,7 @@ namespace FixParamAlgNetControl.Models
             logger.LogInformation($"{DateTime.Now}: The source nodes can control {maximumRank} target nodes within a path of maximum length {Parameters.MaximumPathLength}.");
             // Get the sizes of the subsets to check.
             var minimumSubsetSize = (int)Math.Ceiling((double)maximumRank / (Parameters.MaximumPathLength + 1));
-            var maximumSubsetSize = SourceNodes.Count();
+            var maximumSubsetSize = maximumRank;
             // Define the best solution.
             var bestSolution = SourceNodes.ToList();
             var bestSolutionCount = SourceNodes.Count();
@@ -195,33 +195,42 @@ namespace FixParamAlgNetControl.Models
             // Use a new timer to display the progress.
             using (new Timer(item => logger.LogInformation($"{DateTime.Now}: {Interlocked.Read(ref checkedSubsets)} / {totalSubsets} subset(s) checked in {stopwatch.Elapsed} with a best solution size of {Interlocked.CompareExchange(ref bestSolutionCount, 0, 0)}."), null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
             {
-                // Get all of the subsets of source nodes.
-                var subsets = GetAllSubsets(SourceNodes);
-                // Go over all subsets of source nodes.
-                Parallel.ForEach(subsets, new ParallelOptions { MaxDegreeOfParallelism = Parameters.MaximumDegreeOfParallelism, CancellationToken = cancellationToken }, (subset, state) =>
+                // Try to run the algorithm.
+                try
                 {
-                    // Increment the count of the checked subsets.
-                    Interlocked.Increment(ref checkedSubsets);
-                    // Get the size of the subset.
-                    var subsetCount = subset.Count();
-                    // Check if the current subset size is not valid (outside of the limit sizes, empty, or not smaller than the best solution).
-                    if (subsetCount < minimumSubsetSize || maximumSubsetSize <= subsetCount || subsetCount == 0 || Interlocked.CompareExchange(ref bestSolutionCount, 0, 0) <= subsetCount)
+                    // Get all of the subsets of source nodes.
+                    var subsets = GetAllSubsets(SourceNodes);
+                    // Go over all subsets of source nodes.
+                    Parallel.ForEach(subsets, new ParallelOptions { MaxDegreeOfParallelism = Parameters.MaximumDegreeOfParallelism, CancellationToken = cancellationToken }, (subset, state) =>
                     {
-                        // Continue.
-                        return;
-                    }
-                    // Get a new list containing the subset.
-                    var subsetList = subset.ToList();
-                    // Get the number of controlled targets.
-                    var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subsetList), listPowersMatrixCA);
-                    // Check if the rank is equal to the maximum rank.
-                    if (rank == maximumRank)
-                    {
-                        // Update the best solution.
-                        Interlocked.Exchange(ref bestSolution, subsetList);
-                        Interlocked.Exchange(ref bestSolutionCount, subsetCount);
-                    }
-                });
+                        // Increment the count of the checked subsets.
+                        Interlocked.Increment(ref checkedSubsets);
+                        // Get the size of the subset.
+                        var subsetCount = subset.Count();
+                        // Check if the current subset size is not valid (outside of the limit sizes, empty, or not smaller than the best solution).
+                        if (subsetCount < minimumSubsetSize || maximumSubsetSize < subsetCount || subsetCount == 0 || Interlocked.CompareExchange(ref bestSolutionCount, 0, 0) <= subsetCount)
+                        {
+                            // Continue.
+                            return;
+                        }
+                        // Get a new list containing the subset.
+                        var subsetList = subset.ToList();
+                        // Get the number of controlled targets.
+                        var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subsetList), listPowersMatrixCA);
+                        // Check if the rank is equal to the maximum rank.
+                        if (rank == maximumRank)
+                        {
+                            // Update the best solution.
+                            Interlocked.Exchange(ref bestSolution, subsetList);
+                            Interlocked.Exchange(ref bestSolutionCount, subsetCount);
+                        }
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    // Log an error.
+                    logger.LogInformation($"The application has been stopped by the user.");
+                }
             }
             // Stop the measuring watch.
             stopwatch.Stop();

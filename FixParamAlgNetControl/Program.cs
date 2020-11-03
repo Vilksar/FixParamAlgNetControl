@@ -34,10 +34,10 @@ namespace FixParamAlgNetControl
                 // Run the application host.
                 host.Run();
             }
-            catch (OperationCanceledException)
+            catch (Exception exception)
             {
-                // Log a message.
-                logger.LogInformation("The application has been stopped by the user.");
+                // Log an error.
+                logger.LogError($"The error \"{exception.Message}\" occured while running the application.");
             }
         }
 
