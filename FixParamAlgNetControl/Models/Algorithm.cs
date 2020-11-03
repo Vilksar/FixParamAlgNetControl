@@ -182,34 +182,44 @@ namespace FixParamAlgNetControl.Models
             // Get the maximum number of targets that can be controlled with the given source nodes.
             var maximumRank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, SourceNodes), listPowersMatrixCA);
             // Log a message.
-            logger.LogInformation($"{DateTime.Now}: The given source nodes can control at most {maximumRank} target nodes within a path of maximum length {Parameters.MaximumPathLength}.");
+            logger.LogInformation($"{DateTime.Now}: The source nodes can control {maximumRank} target nodes within a path of maximum length {Parameters.MaximumPathLength}.");
             // Get the sizes of the subsets to check.
             var minimumSubsetSize = (int)Math.Ceiling((double)maximumRank / (Parameters.MaximumPathLength + 1));
             var maximumSubsetSize = SourceNodes.Count();
-            // Define a new concurrent bag.
-            var concurrentBag = new ConcurrentBag<List<string>>();
-            // Get all of the subsets of source nodes, ordered by their size.
-            var subsets = Enumerable.Range(minimumSubsetSize, maximumSubsetSize - minimumSubsetSize + 1).Select(item => GetAllSubsetsOfSize(SourceNodes, item)).SelectMany(item => item);
+            // Define the best solution.
+            var bestSolution = SourceNodes.ToList();
+            var bestSolutionCount = SourceNodes.Count();
             // Define the variables required for the loop.
             var checkedSubsets = (long)0;
             var totalSubsets = (long)GetRowOfPascalTriangle(SourceNodes.Count()).Skip(minimumSubsetSize).Take(maximumSubsetSize - minimumSubsetSize + 1).Sum();
             // Use a new timer to display the progress.
-            using (new Timer(item => logger.LogInformation($"{DateTime.Now}: {Interlocked.Read(ref checkedSubsets)} / {totalSubsets} subset(s) checked ({stopwatch.Elapsed})."), null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
+            using (new Timer(item => logger.LogInformation($"{DateTime.Now}: {Interlocked.Read(ref checkedSubsets)} / {totalSubsets} subset(s) checked in {stopwatch.Elapsed} with a best solution size of {Interlocked.CompareExchange(ref bestSolutionCount, 0, 0)}."), null, TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(30.0)))
             {
+                // Get all of the subsets of source nodes.
+                var subsets = GetAllSubsets(SourceNodes);
                 // Go over all subsets of source nodes.
                 Parallel.ForEach(subsets, new ParallelOptions { MaxDegreeOfParallelism = Parameters.MaximumDegreeOfParallelism, CancellationToken = cancellationToken }, (subset, state) =>
                 {
                     // Increment the count of the checked subsets.
                     Interlocked.Increment(ref checkedSubsets);
+                    // Get the size of the subset.
+                    var subsetCount = subset.Count();
+                    // Check if the current subset size is not valid (outside of the limit sizes, empty, or not smaller than the best solution).
+                    if (subsetCount < minimumSubsetSize || maximumSubsetSize <= subsetCount || subsetCount == 0 || Interlocked.CompareExchange(ref bestSolutionCount, 0, 0) <= subsetCount)
+                    {
+                        // Continue.
+                        return;
+                    }
+                    // Get a new list containing the subset.
+                    var subsetList = subset.ToList();
                     // Get the number of controlled targets.
-                    var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subset.ToList()), listPowersMatrixCA);
+                    var rank = GetStructuralKalmanMatrixRank(GetMatrixB(nodeIndices, subsetList), listPowersMatrixCA);
                     // Check if the rank is equal to the maximum rank.
                     if (rank == maximumRank)
                     {
-                        // Add the solution to the bag.
-                        concurrentBag.Add(subset.ToList());
-                        // Break.
-                        state.Stop();
+                        // Update the best solution.
+                        Interlocked.Exchange(ref bestSolution, subsetList);
+                        Interlocked.Exchange(ref bestSolutionCount, subsetCount);
                     }
                 });
             }
@@ -217,16 +227,6 @@ namespace FixParamAlgNetControl.Models
             stopwatch.Stop();
             // Log a message.
             logger.LogInformation($"{DateTime.Now}: The algorithm has ended.");
-            // Get the solution.
-            var solution = concurrentBag.FirstOrDefault();
-            // Check if there wasn't any solution found.
-            if (solution == null)
-            {
-                // Log a message.
-                logger.LogError($"{DateTime.Now}: The algorithm completed, but didn't return any solutions.");
-                // Return.
-                return null;
-            }
             // Return the results.
             return new Result
             {
@@ -235,8 +235,8 @@ namespace FixParamAlgNetControl.Models
                 TargetNodeCount = TargetNodes.Count(),
                 SourceNodeCount = SourceNodes.Count(),
                 MaximumRank = maximumRank,
-                SolutionNodeCount = solution.Count(),
-                SolutionNodes = solution,
+                SolutionNodeCount = bestSolutionCount,
+                SolutionNodes = bestSolution,
                 TimeElapsed = stopwatch.Elapsed,
             };
         }
@@ -411,16 +411,30 @@ namespace FixParamAlgNetControl.Models
         /// </summary>
         /// <param name="list">The initial list.</param>
         /// <returns>All subsets of the list.</returns>
-        private static IEnumerable<List<string>> GetAllSubsetsOfSize(List<string> list, int subsetSize)
+        private static IEnumerable<List<string>> GetAllSubsets(List<string> list)
         {
             // Return all of the subsets of the list, ordered by their size.
-            return Enumerable.Range(0, 1 << list.Count())
-                .Select(item => Enumerable.Range(0, list.Count())
-                    .Where(item1 => (item & (1 << item1)) != 0))
-                .Where(item => item.Count() == subsetSize)
-                .Select(item => item
-                    .Select(item1 => list[item1])
+            return GetRange(0, (long)Math.Pow(2, list.LongCount()))
+                .Select(item => GetRange(0, list.LongCount())
+                    .Where(item1 => (item & ((long)Math.Pow(2, item1))) != 0)
+                    .Select(item1 => list[(int)item1])
                     .ToList());
+        }
+
+        /// <summary>
+        /// Gets the range starting from the initial value, and containing the specified number of items.
+        /// </summary>
+        /// <param name="start">The starting value for the range.</param>
+        /// <param name="count">The number of items in the range.</param>
+        /// <returns>The range starting from the initial value, and containing the specified number of items.</returns>
+        public static IEnumerable<long> GetRange(long start, long count)
+        {
+            // Go over each value of count and increase the start value.
+            for (; count-- > 0; start++)
+            {
+                // Yield return the start value.
+                yield return start;
+            }
         }
 
         /// <summary>
