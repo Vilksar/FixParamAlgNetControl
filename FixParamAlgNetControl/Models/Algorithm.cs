@@ -228,8 +228,8 @@ namespace FixParamAlgNetControl.Models
                 }
                 catch (OperationCanceledException)
                 {
-                    // Log an error.
-                    logger.LogInformation($"The application has been stopped by the user.");
+                    // Log a message.
+                    logger.LogInformation($"{DateTime.Now}: The application has been stopped.");
                 }
             }
             // Stop the measuring watch.
