@@ -1,0 +1,40 @@
+{
+  "Name": "Electronic_Circuit_1",
+  "Targets": "Electronic_Circuit_1_Target-20",
+  "Sources": "Electronic_Circuit_1_Source-20",
+  "Parameters": {
+    "RandomSeed": 936607478,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 122,
+    "EdgeCount": 189,
+    "TargetNodeCount": 20,
+    "SourceNodeCount": 20,
+    "MaximumRank": 18,
+    "SolutionNodeCount": 6,
+    "SolutionNodes": [
+      "8",
+      "38",
+      "78",
+      "53",
+      "35",
+      "18"
+    ],
+    "TimeElapsed": {
+      "Ticks": 2841538437,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 153,
+      "Minutes": 4,
+      "Seconds": 44,
+      "TotalDays": 0.0032888176354166666,
+      "TotalHours": 0.07893162325,
+      "TotalMilliseconds": 284153.8437,
+      "TotalMinutes": 4.735897395,
+      "TotalSeconds": 284.1538437
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "Name": "Protein-Protein_Interaction_3",
+  "Targets": "Protein-Protein_Interaction_3_Target-10",
+  "Sources": "Protein-Protein_Interaction_3_Source-10",
+  "Parameters": {
+    "RandomSeed": 385610420,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 433,
+    "EdgeCount": 1604,
+    "TargetNodeCount": 10,
+    "SourceNodeCount": 10,
+    "MaximumRank": 10,
+    "SolutionNodeCount": 3,
+    "SolutionNodes": [
+      "BRCA1",
+      "FOXM1",
+      "ARAF"
+    ],
+    "TimeElapsed": {
+      "Ticks": 58493016,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 849,
+      "Minutes": 0,
+      "Seconds": 5,
+      "TotalDays": 6.770025E-05,
+      "TotalHours": 0.001624806,
+      "TotalMilliseconds": 5849.3016,
+      "TotalMinutes": 0.09748836,
+      "TotalSeconds": 5.8493016
+    }
+  }
+}

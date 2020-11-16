@@ -1,0 +1,38 @@
+{
+  "Name": "Protein-Protein_Interaction_1",
+  "Targets": "Protein-Protein_Interaction_1_Target-10",
+  "Sources": "Protein-Protein_Interaction_1_Source-30",
+  "Parameters": {
+    "RandomSeed": 905517873,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 64,
+    "EdgeCount": 94,
+    "TargetNodeCount": 10,
+    "SourceNodeCount": 30,
+    "MaximumRank": 10,
+    "SolutionNodeCount": 4,
+    "SolutionNodes": [
+      "CDK11B",
+      "LCK",
+      "RPS6",
+      "FZD1"
+    ],
+    "TimeElapsed": {
+      "Ticks": 68706241054,
+      "Days": 0,
+      "Hours": 1,
+      "Milliseconds": 624,
+      "Minutes": 54,
+      "Seconds": 30,
+      "TotalDays": 0.07952111233101852,
+      "TotalHours": 1.9085066959444446,
+      "TotalMilliseconds": 6870624.1054,
+      "TotalMinutes": 114.51040175666667,
+      "TotalSeconds": 6870.6241054
+    }
+  }
+}

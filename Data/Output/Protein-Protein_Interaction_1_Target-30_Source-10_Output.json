@@ -1,0 +1,38 @@
+{
+  "Name": "Protein-Protein_Interaction_1",
+  "Targets": "Protein-Protein_Interaction_1_Target-30",
+  "Sources": "Protein-Protein_Interaction_1_Source-10",
+  "Parameters": {
+    "RandomSeed": 278914198,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 64,
+    "EdgeCount": 94,
+    "TargetNodeCount": 30,
+    "SourceNodeCount": 10,
+    "MaximumRank": 18,
+    "SolutionNodeCount": 4,
+    "SolutionNodes": [
+      "NRTN",
+      "EGFR",
+      "LCK",
+      "AURKB"
+    ],
+    "TimeElapsed": {
+      "Ticks": 3081619,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 308,
+      "Minutes": 0,
+      "Seconds": 0,
+      "TotalDays": 3.5666886574074075E-06,
+      "TotalHours": 8.560052777777777E-05,
+      "TotalMilliseconds": 308.1619,
+      "TotalMinutes": 0.005136031666666666,
+      "TotalSeconds": 0.3081619
+    }
+  }
+}

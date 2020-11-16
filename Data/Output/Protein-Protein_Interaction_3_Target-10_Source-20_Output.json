@@ -1,0 +1,37 @@
+{
+  "Name": "Protein-Protein_Interaction_3",
+  "Targets": "Protein-Protein_Interaction_3_Target-10",
+  "Sources": "Protein-Protein_Interaction_3_Source-20",
+  "Parameters": {
+    "RandomSeed": 585281241,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 433,
+    "EdgeCount": 1604,
+    "TargetNodeCount": 10,
+    "SourceNodeCount": 20,
+    "MaximumRank": 10,
+    "SolutionNodeCount": 3,
+    "SolutionNodes": [
+      "PRKCQ",
+      "SMAD2",
+      "YWHAG"
+    ],
+    "TimeElapsed": {
+      "Ticks": 178893676,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 889,
+      "Minutes": 0,
+      "Seconds": 17,
+      "TotalDays": 0.00020705286574074073,
+      "TotalHours": 0.004969268777777778,
+      "TotalMilliseconds": 17889.3676,
+      "TotalMinutes": 0.2981561266666667,
+      "TotalSeconds": 17.8893676
+    }
+  }
+}

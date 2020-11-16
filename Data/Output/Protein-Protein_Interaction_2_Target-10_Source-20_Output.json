@@ -1,0 +1,38 @@
+{
+  "Name": "Protein-Protein_Interaction_2",
+  "Targets": "Protein-Protein_Interaction_2_Target-10",
+  "Sources": "Protein-Protein_Interaction_2_Source-20",
+  "Parameters": {
+    "RandomSeed": 1008090086,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 58,
+    "EdgeCount": 64,
+    "TargetNodeCount": 10,
+    "SourceNodeCount": 20,
+    "MaximumRank": 10,
+    "SolutionNodeCount": 4,
+    "SolutionNodes": [
+      "HSP90AA1",
+      "CHEK1",
+      "INSR",
+      "CREBBP"
+    ],
+    "TimeElapsed": {
+      "Ticks": 60747566,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 74,
+      "Minutes": 0,
+      "Seconds": 6,
+      "TotalDays": 7.030968287037036E-05,
+      "TotalHours": 0.001687432388888889,
+      "TotalMilliseconds": 6074.7566,
+      "TotalMinutes": 0.10124594333333334,
+      "TotalSeconds": 6.0747566
+    }
+  }
+}

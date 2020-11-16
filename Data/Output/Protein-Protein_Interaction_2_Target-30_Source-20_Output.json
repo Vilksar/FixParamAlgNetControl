@@ -1,0 +1,44 @@
+{
+  "Name": "Protein-Protein_Interaction_2",
+  "Targets": "Protein-Protein_Interaction_2_Target-30",
+  "Sources": "Protein-Protein_Interaction_2_Source-20",
+  "Parameters": {
+    "RandomSeed": 2139619221,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 58,
+    "EdgeCount": 64,
+    "TargetNodeCount": 30,
+    "SourceNodeCount": 20,
+    "MaximumRank": 20,
+    "SolutionNodeCount": 10,
+    "SolutionNodes": [
+      "HSP90AA1",
+      "INSR",
+      "RAN",
+      "TGFB1",
+      "PPP5C",
+      "CREBBP",
+      "PLRG1",
+      "INCENP",
+      "PIK3R3",
+      "RPA2"
+    ],
+    "TimeElapsed": {
+      "Ticks": 10415009903,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 500,
+      "Minutes": 17,
+      "Seconds": 21,
+      "TotalDays": 0.012054409609953704,
+      "TotalHours": 0.2893058306388889,
+      "TotalMilliseconds": 1041500.9903,
+      "TotalMinutes": 17.358349838333332,
+      "TotalSeconds": 1041.5009903
+    }
+  }
+}

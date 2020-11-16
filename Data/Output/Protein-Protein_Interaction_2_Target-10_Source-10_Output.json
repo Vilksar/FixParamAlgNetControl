@@ -1,0 +1,37 @@
+{
+  "Name": "Protein-Protein_Interaction_2",
+  "Targets": "Protein-Protein_Interaction_2_Target-10",
+  "Sources": "Protein-Protein_Interaction_2_Source-10",
+  "Parameters": {
+    "RandomSeed": 1874599832,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 58,
+    "EdgeCount": 64,
+    "TargetNodeCount": 10,
+    "SourceNodeCount": 10,
+    "MaximumRank": 7,
+    "SolutionNodeCount": 3,
+    "SolutionNodes": [
+      "KIT",
+      "RPA2",
+      "INCENP"
+    ],
+    "TimeElapsed": {
+      "Ticks": 1848807,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 184,
+      "Minutes": 0,
+      "Seconds": 0,
+      "TotalDays": 2.1398229166666665E-06,
+      "TotalHours": 5.135575E-05,
+      "TotalMilliseconds": 184.8807,
+      "TotalMinutes": 0.003081345,
+      "TotalSeconds": 0.1848807
+    }
+  }
+}

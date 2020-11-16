@@ -1,0 +1,41 @@
+{
+  "Name": "Protein-Protein_Interaction_3",
+  "Targets": "Protein-Protein_Interaction_3_Target-30",
+  "Sources": "Protein-Protein_Interaction_3_Source-10",
+  "Parameters": {
+    "RandomSeed": 918714969,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 433,
+    "EdgeCount": 1604,
+    "TargetNodeCount": 30,
+    "SourceNodeCount": 10,
+    "MaximumRank": 29,
+    "SolutionNodeCount": 7,
+    "SolutionNodes": [
+      "BRCA1",
+      "ESR1",
+      "PPP1CC",
+      "STAM",
+      "FOXM1",
+      "MAP3K7",
+      "ARAF"
+    ],
+    "TimeElapsed": {
+      "Ticks": 427350107,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 735,
+      "Minutes": 0,
+      "Seconds": 42,
+      "TotalDays": 0.0004946181793981482,
+      "TotalHours": 0.011870836305555556,
+      "TotalMilliseconds": 42735.0107,
+      "TotalMinutes": 0.7122501783333334,
+      "TotalSeconds": 42.7350107
+    }
+  }
+}

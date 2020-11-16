@@ -1,0 +1,38 @@
+{
+  "Name": "Social_Interaction_1",
+  "Targets": "Social_Interaction_1_Target-20",
+  "Sources": "Social_Interaction_1_Source-20",
+  "Parameters": {
+    "RandomSeed": 1839690548,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 32,
+    "EdgeCount": 96,
+    "TargetNodeCount": 20,
+    "SourceNodeCount": 20,
+    "MaximumRank": 20,
+    "SolutionNodeCount": 4,
+    "SolutionNodes": [
+      "12",
+      "24",
+      "4",
+      "27"
+    ],
+    "TimeElapsed": {
+      "Ticks": 23915744,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 391,
+      "Minutes": 0,
+      "Seconds": 2,
+      "TotalDays": 2.768025925925926E-05,
+      "TotalHours": 0.0006643262222222222,
+      "TotalMilliseconds": 2391.5744,
+      "TotalMinutes": 0.039859573333333335,
+      "TotalSeconds": 2.3915744
+    }
+  }
+}

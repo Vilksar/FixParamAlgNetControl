@@ -1,0 +1,37 @@
+{
+  "Name": "Protein-Protein_Interaction_3",
+  "Targets": "Protein-Protein_Interaction_3_Target-10",
+  "Sources": "Protein-Protein_Interaction_3_Source-30",
+  "Parameters": {
+    "RandomSeed": 289146214,
+    "MaximumPathLength": 5,
+    "RankComputations": 3,
+    "MaximumDegreeOfParallelism": 16
+  },
+  "Result": {
+    "NodeCount": 433,
+    "EdgeCount": 1604,
+    "TargetNodeCount": 10,
+    "SourceNodeCount": 30,
+    "MaximumRank": 10,
+    "SolutionNodeCount": 3,
+    "SolutionNodes": [
+      "BIRC5",
+      "IKBKB",
+      "CCNB1"
+    ],
+    "TimeElapsed": {
+      "Ticks": 29211343376,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 134,
+      "Minutes": 48,
+      "Seconds": 41,
+      "TotalDays": 0.033809425203703704,
+      "TotalHours": 0.8114262048888888,
+      "TotalMilliseconds": 2921134.3376,
+      "TotalMinutes": 48.68557229333334,
+      "TotalSeconds": 2921.1343376
+    }
+  }
+}
