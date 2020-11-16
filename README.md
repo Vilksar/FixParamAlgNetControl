@@ -85,7 +85,7 @@ This mode has four mandatory arguments (omitting any of them will return an erro
     "RandomSeed": -1,
     "MaximumPathLength": 5,
     "RankComputations": 3,
-    "RunInParallel": false
+    "MaximumDegreeOfParallelism": 1
   }
   ```
   
@@ -94,7 +94,7 @@ This mode has four mandatory arguments (omitting any of them will return an erro
   * `RandomSeed`. Represents the random seed for the current algorithm run. A value of `-1` will generate a random value for the seed. It must be a positive integer, and its default value is `-1`.
   * `MaximumPathLength`. Represents the maximum number of edges in a control path. It must be a positive integer, and its default value is `5`.
   * `RankComputations`. Represents the number of matrix rank computations to determine its structural rank. It must be a positive integer, and its default value is `3`.
-  * `RunInParallel`. Represents a flag which enables running the current algorithm in parallel over multiple threads. It must be a boolean, and its default value is `false`.
+  * `MaximumDegreeOfParallelism`. Represents the maximum number of parallel operations over different threads. It must be a positive integer, and its default value is `1`.
   
   If the file is in a different format, an error will be returned. Additionally, if any of the parameters are missing, their default values will be used. This argument does not have a default value.
 
