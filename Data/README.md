@@ -14,9 +14,9 @@ Networks | Source
 :--- | :---:
 Social Interaction 1, 2 | [Link](https://doi.org/10.1126/science.1089167)
 Electronic Circuit 1 | [Link](https://doi.org/10.1126/science.298.5594.824)
-Protein-Protein Interaction 1, 2, 3, 4 | [Link](https://doi.org/10.1038/s41598-017-10491-y)
+Protein-Protein Interaction 1, 2, 3 | [Link](https://doi.org/10.1038/s41598-017-10491-y)
 
-The protein-protein interaction networks have been generated starting from the essential genes for breast cancer (1, 3, 4) and pancreatic cancer (2) described in the reference, using the [OmniPath](https://doi.org/10.1038/nmeth.4077) database, and considering the interactions between the essential genes (1, 2), the interactions between the essential genes with one intermediary gene (3), or all interactions that contain the essential genes (4).
+The protein-protein interaction networks have been generated starting from the essential genes for breast cancer (1, 3) and pancreatic cancer (2) described in the reference, using the [OmniPath](https://doi.org/10.1038/nmeth.4077) database, and considering the interactions between the essential genes (1, 2), or the interactions between the essential genes with one intermediary gene (3).
 
 ## Input
 
