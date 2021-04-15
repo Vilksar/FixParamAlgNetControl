@@ -16,7 +16,7 @@ namespace FixParamAlgNetControl.Services
     /// <summary>
     /// Represents the CLI hosted service.
     /// </summary>
-    public class CLIHostedService : BackgroundService
+    public class CliHostedService : BackgroundService
     {
         /// <summary>
         /// Represents the configuration.
@@ -26,7 +26,7 @@ namespace FixParamAlgNetControl.Services
         /// <summary>
         /// Represents the logger.
         /// </summary>
-        private readonly ILogger<CLIHostedService> _logger;
+        private readonly ILogger<CliHostedService> _logger;
 
         /// <summary>
         /// Represents the host application lifetime.
@@ -39,7 +39,7 @@ namespace FixParamAlgNetControl.Services
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="logger">Represents the logger.</param>
         /// <param name="hostApplicationLifetime">Represents the application lifetime.</param>
-        public CLIHostedService(IConfiguration configuration, ILogger<CLIHostedService> logger, IHostApplicationLifetime hostApplicationLifetime)
+        public CliHostedService(IConfiguration configuration, ILogger<CliHostedService> logger, IHostApplicationLifetime hostApplicationLifetime)
         {
             _configuration = configuration;
             _logger = logger;
@@ -164,7 +164,7 @@ namespace FixParamAlgNetControl.Services
             catch (Exception exception)
             {
                 // Log an error.
-                _logger.LogError($"The error \"{exception.Message}\" occured while reading the file \"{edgesFilepath}\" (containing the edges).");
+                _logger.LogError($"The error \"{exception.Message}\" occurred while reading the file \"{edgesFilepath}\" (containing the edges).");
                 // Stop the application.
                 _hostApplicationLifetime.StopApplication();
                 // Return a successfully completed task.
@@ -182,7 +182,7 @@ namespace FixParamAlgNetControl.Services
             catch (Exception exception)
             {
                 // Log an error.
-                _logger.LogError($"The error \"{exception.Message}\" occured while reading the file \"{targetNodesFilepath}\" (containing the target nodes).");
+                _logger.LogError($"The error \"{exception.Message}\" occurred while reading the file \"{targetNodesFilepath}\" (containing the target nodes).");
                 // Stop the application.
                 _hostApplicationLifetime.StopApplication();
                 // Return a successfully completed task.
@@ -203,7 +203,7 @@ namespace FixParamAlgNetControl.Services
                 catch (Exception exception)
                 {
                     // Log an error.
-                    _logger.LogError($"The error \"{exception.Message}\" occured while reading the file \"{sourceNodesFilepath}\" (containing the preferred nodes).");
+                    _logger.LogError($"The error \"{exception.Message}\" occurred while reading the file \"{sourceNodesFilepath}\" (containing the preferred nodes).");
                     // Stop the application.
                     _hostApplicationLifetime.StopApplication();
                     // Return a successfully completed task.
@@ -219,7 +219,7 @@ namespace FixParamAlgNetControl.Services
             catch (Exception exception)
             {
                 // Log an error.
-                _logger.LogError($"The error \"{exception.Message}\" occured while reading the file \"{parametersFilepath}\" (containing the parameters).");
+                _logger.LogError($"The error \"{exception.Message}\" occurred while reading the file \"{parametersFilepath}\" (containing the parameters).");
                 // Stop the application.
                 _hostApplicationLifetime.StopApplication();
                 // Return a successfully completed task.
@@ -240,7 +240,7 @@ namespace FixParamAlgNetControl.Services
             catch (Exception exception)
             {
                 // Log an error.
-                _logger.LogError($"The error \"{exception.Message}\" occured while trying to write to the output file \"{outputFilepath}\".");
+                _logger.LogError($"The error \"{exception.Message}\" occurred while trying to write to the output file \"{outputFilepath}\".");
                 // Stop the application.
                 _hostApplicationLifetime.StopApplication();
                 // Return a successfully completed task.
@@ -311,7 +311,7 @@ namespace FixParamAlgNetControl.Services
             catch (Exception exception)
             {
                 // Log an error.
-                _logger.LogError($"The error \"{exception.Message}\" occured while running the algorithm.");
+                _logger.LogError($"The error \"{exception.Message}\" occurred while running the algorithm.");
                 // Stop the application.
                 _hostApplicationLifetime.StopApplication();
                 // Return a successfully completed task.
@@ -332,12 +332,12 @@ namespace FixParamAlgNetControl.Services
                 // Write the text to the file.
                 File.WriteAllText(outputFilepath, outputText);
                 // Log a message.
-                _logger.LogInformation($"The results have been written in JSON format to the file \"{outputFilepath}\".");
+                _logger.LogInformation($"The results have been written to the file \"{outputFilepath}\".");
             }
             catch (Exception exception)
             {
                 // Log an error.
-                _logger.LogError($"The error \"{exception.Message}\" occured while writing the results to the file \"{outputFilepath}\". The results will be displayed below instead.");
+                _logger.LogError($"The error \"{exception.Message}\" occurred while writing the results to the file \"{outputFilepath}\". The results will be displayed below instead.");
                 // Log the output text.
                 _logger.LogInformation(outputText);
                 // Stop the application.

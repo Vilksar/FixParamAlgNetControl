@@ -21,9 +21,9 @@ namespace FixParamAlgNetControl
             // Get the current command-line arguments configuration.
             var configuration = new ConfigurationBuilder().AddCommandLine(args).Build();
             // Get the mode in which to run the application.
-            var mode = configuration["Mode"];
+            var mode = configuration["Mode"] ?? "Help";
             // Get the host to run based on the command-line arguments and build it.
-            using var host = (mode == "CLI" ? CreateCLIHostBuilder(args) : CreateDefaultHostBuilder(args)).Build();
+            using var host = (mode == "Cli" ? CreateCLIHostBuilder(args) : CreateDefaultHostBuilder(args)).Build();
             // Get the corresponding logger.
             var logger = host.Services.GetService<ILogger<Program>>();
             // Log a message.
@@ -56,7 +56,7 @@ namespace FixParamAlgNetControl
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddHostedService<CLIHostedService>();
+                    services.AddHostedService<CliHostedService>();
                 });
         }
 

@@ -66,24 +66,24 @@ namespace FixParamAlgNetControl.Services
                 "\n\tAll argument names and values are case-sensitive. The following arguments can be provided:",
                 "\n\t--Mode\tUse this argument to apecify the mode in which the application will run. The possible values are \"CLI\" (the application will run in the command-line) and \"Help\" (the application will display this help message). The default value is \"Help\".",
                 "\n\tArguments for \"Help\" mode:",
-                "\n\t--GenerateParametersFile\tUse this argument to instruct the application to generate, in the current directory, a model of the parameters JSON file (containing the default parameter values) required for running the algorithm. Writing permission is needed for the directory. The default value is \"False\".",
-                "\n\tArguments for \"CLI\" mode:",
+                "\n\t--GenerateParametersFile\tUse this argument to instruct the application to generate, in the current directory, a model of the parameters JSON file (containing the default parameter values) required for running the algorithm. Writing permission is needed for the current directory. The default value is \"False\".",
+                "\n\tArguments for \"Cli\" mode:",
                 "\n\t--Edges\tUse this argument to specify the path to the file containing the edges of the network. Each edge should be on a new line, with its source and target nodes being separated by a semicolon character. This argument has no default value.",
                 "\n\t--Targets\tUse this argument to specify the path to the file containing the target nodes of the network. Only nodes appearing in the network will be considered. Each node should be on a new line. This argument has no default value.",
                 "\n\t--Sources\tUse this argument to specify the path to the file containing the source nodes of the network. Only nodes appearing in the network will be considered. Each node should be on a new line. This argument has no default value.",
                 "\n\t--Parameters\tUse this argument to specify the path to the file containing the parameter values for the analysis. The file should be in JSON format. You can generate a model file by running the application with the \"Mode\" argument set to \"Help\" and the \"GenerateParametersFile\" argument set to \"True\". This argument has no default value.",
-                "\n\t--Output\t(optional) Use this argument to specify the path to the output file where the solutions of the algorithm will be written. Writing permission is needed for the corresponding directory. If a file with the same name already exists, it will be automatically overwritten. The default value is the name of the file containing the edges, followed by the current date and time.",
+                "\n\t--Output\t(optional) Use this argument to specify the path to the output file where the results will be written. Writing permission is needed for the corresponding directory. If a file with the same name already exists, it will be automatically overwritten. The default value is the name of the file containing the edges, followed by the current date and time.",
                 "\n\t",
                 "\n\t---",
                 "\n\t",
                 "\n\tExamples of posible usage:",
                 "\n\t--Mode \"Help\"",
                 "\n\t--Mode \"Help\" --GenerateParametersFile \"True\"",
-                "\n\t--Mode \"CLI\" --Edges \"Path/To/FileContainingEdges.extension\" --Targets \"Path/To/FileContainingTargetNodes.extension\" --Sources \"Path/To/FileContainingSourceNodes.extension\" --Parameters \"Path/To/FileContainingParameters.extension\"",
-                "\n\t--Mode \"CLI\" --Edges \"Path/To/FileContainingEdges.extension\" --Targets \"Path/To/FileContainingTargetNodes.extension\" --Sources \"Path/To/FileContainingSourceNodes.extension\" --Parameters \"Path/To/FileContainingParameters.extension\" --Output \"Path/To/OutputFile.extension\"",
+                "\n\t--Mode \"Cli\" --Edges \"Path/To/FileContainingEdges.extension\" --Targets \"Path/To/FileContainingTargetNodes.extension\" --Sources \"Path/To/FileContainingSourceNodes.extension\" --Parameters \"Path/To/FileContainingParameters.extension\"",
+                "\n\t--Mode \"Cli\" --Edges \"Path/To/FileContainingEdges.extension\" --Targets \"Path/To/FileContainingTargetNodes.extension\" --Sources \"Path/To/FileContainingSourceNodes.extension\" --Parameters \"Path/To/FileContainingParameters.extension\" --Output \"Path/To/OutputFile.extension\"",
                 "\n\t"));
             // Check if the mode is not valid.
-            if (mode != "Help")
+            if (!string.IsNullOrEmpty(mode) && mode != "Help")
             {
                 // Log an error.
                 _logger.LogError($"The provided mode \"{mode}\" for running the application is not valid.");
@@ -105,12 +105,12 @@ namespace FixParamAlgNetControl.Services
                     // Write the text to the file.
                     File.WriteAllText(outputFile, outputText);
                     // Log a message.
-                    _logger.LogInformation($"The results have been written in JSON format to the file \"{outputFile}\".");
+                    _logger.LogInformation($"The default parameters have been written to the file \"{outputFile}\".");
                 }
                 catch (Exception exception)
                 {
                     // Log an error.
-                    _logger.LogError($"The error \"{exception.Message}\" occured while writing the results to the file \"{outputFile}\". The results will be displayed below instead.");
+                    _logger.LogError($"The error \"{exception.Message}\" occurred while writing the default parameters to the file \"{outputFile}\". The default parameters will be displayed below instead.");
                     // Log the output text.
                     _logger.LogInformation(outputText);
                     // Stop the application.

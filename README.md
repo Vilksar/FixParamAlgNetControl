@@ -6,14 +6,13 @@
 * [Download](#download)
 * [Usage](#usage)
   * [Help](#help)
-  * [CLI](#cli)
-* [Examples](#examples)
+  * [Cli](#cli)
 
 ## Introduction
 
 Welcome to the FixParamAlgNetControl repository!
 
-This is C# / .Net Core application which implements algorithms aiming to help in solving the structural target controllability problem. The application is cross-platform, working on all modern operating systems (Windows, MacOS, Linux) and can be run through CLI (command-line interface).
+This is C# / .NET Core application which implements algorithms aiming to help in solving the structural target controllability problem. The application is cross-platform, working on all modern operating systems (Windows, MacOS, Linux) and can be run through CLI (command-line interface).
 
 ## Download
 
@@ -37,14 +36,14 @@ In order to find out more about the usage and possible arguments which can be us
 
 This mode has one optional argument:
 
-* `--GenerateParametersFile`. Use this argument to instruct the application to generate, in the current directory, a model of the parameters JSON file (containing the default parameter values) required for running the algorithm. Writing permission is needed for the directory. The default value is `False`.
+* `--GenerateParametersFile`. Use this argument to instruct the application to generate, in the current directory, a model of the parameters JSON file (containing the default parameter values) required for running the algorithm. Writing permission is needed for the current directory. The default value is `False`.
 
-### CLI
+### Cli
 
-To run the application via CLI, you need to launch it from the terminal with the `--Mode` argument set to `CLI`, for example:
+To run the application via CLI, you need to launch it from the terminal with the `--Mode` argument set to `Cli`, for example:
 
 ```
---Mode "CLI"
+--Mode "Cli"
 ```
 
 This mode has four mandatory arguments (omitting any of them will return an error) and one optional one:
@@ -100,28 +99,4 @@ This mode has four mandatory arguments (omitting any of them will return an erro
 
 * `--Output`. (optional) Use this argument to specify the path to the output file where the solutions of the analysis will be written. Permission to write is needed for the corresponding folder. If a file with the same name already exists, it will be automatically overwritten. The default value is the name of the file containing the edges, followed by the current date and time.
 
-If all the files have been successfully read and loaded, a confirmation message will be logged to the terminal and the algorithm will start running, providing constant feedback on its progress. Upon completion, all of the solutions will be written to the JSON file specified by the `--Output` argument.
-
-## Examples
-
-These are a few examples of possible command-line parameters for running the application.
-
-* Help
-  
-  ```
-  ./FixParamAlgNetControl --Mode "Help"
-  ```
-  
-  ```
-  ./FixParamAlgNetControl --Mode "Help" --GenerateParametersFile "True"
-  ```
-  
-* CLI
-    
-  ```
-  ./FixParamAlgNetControl --Mode "CLI" --Edges "Path/To/FileContainingEdges.extension" --Targets "Path/To/FileContainingTargetNodes.extension" --Sources "Path/To/FileContainingSourceNodes.extension" --Parameters "Path/To/FileContainingParameters.extension"
-  ```
-  
-  ```
-  ./FixParamAlgNetControl --Mode "CLI" --Edges "Path/To/FileContainingEdges.extension" --Targets "Path/To/FileContainingTargetNodes.extension" --Sources "Path/To/FileContainingSourceNodes.extension" --Parameters "Path/To/FileContainingParameters.extension" --Output "Path/To/OutputFile.extension"
-  ```
+If all the files have been successfully read and loaded, a confirmation message will be displayed and the application will start running, providing constant feedback on its progress. Upon completion, the results will be written to the JSON file specified by the `--Output` argument.
